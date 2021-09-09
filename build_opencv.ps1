@@ -1,5 +1,5 @@
-function BuildForWindows($platform, $build_type, $world_flag) {
-    $build_dir = "build_${build_type}_${platform}_${world_flag}"
+function BuildForWindows($platform, $build_type, $generate_flag) {
+    $build_dir = "build"
     mkdir $build_dir -Force -ErrorAction Stop | Out-Null
     cd $build_dir
     pwd
@@ -12,11 +12,11 @@ function BuildForWindows($platform, $build_type, $world_flag) {
         $msbuild_platform = "Win32"
         $msmf_flag = "OFF"
     }
-    if ($world_flag -eq "ON") {
-        $env:world_name = "-world"
+    if ($generate_flag -eq "world") {
+        $world_flag = "ON"
     }
     else {
-        $env:world_name = ""
+        $world_flag = "OFF"
     }
 
 
