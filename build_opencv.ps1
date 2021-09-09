@@ -1,5 +1,5 @@
-function BuildForWindows($platform, $build_type) {
-    $build_dir = "build_${build_type}_${platform}"
+function BuildForWindows($platform, $build_type, $world_flag) {
+    $build_dir = "build_${build_type}_${platform}_${world_flag}"
     mkdir $build_dir -Force -ErrorAction Stop | Out-Null
     cd $build_dir
     pwd
@@ -11,6 +11,12 @@ function BuildForWindows($platform, $build_type) {
     else {
         $msbuild_platform = "Win32"
         $msmf_flag = "OFF"
+    }
+    if ($world_flag -eq "ON") {
+        $env:world_name = "-world"
+    }
+    else {
+        $env:world_name = ""
     }
 
 
@@ -39,7 +45,7 @@ function BuildForWindows($platform, $build_type) {
         -D BUILD_opencv_python_bindings_generator=OFF `
         -D BUILD_opencv_python_tests=OFF `
         -D BUILD_opencv_ts=OFF `
-        -D BUILD_opencv_world=ON `
+        -D BUILD_opencv_world=$world_flag `
         -D WITH_MSMF=${msmf_flag} `
         -D WITH_MSMF_DXVA=${msmf_flag} `
         -D WITH_QT=OFF `

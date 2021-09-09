@@ -48,6 +48,7 @@ jobs:
       matrix:
         build_type: ["Debug", "Release"]
         arch: ["x86", "x64"]
+        world_flag: ["ON", "OFF"]
 
     runs-on: windows-latest
 
@@ -73,11 +74,11 @@ jobs:
       - name: Build OpenCV
         run: |
           . ".\build_opencv.ps1"
-          BuildForWindows ${{matrix.arch}} ${{matrix.build_type}}
+          BuildForWindows ${{matrix.arch}} ${{matrix.build_type}} ${{world_flag}}
 
       - name: Compress Package
         run: |
-          7z a opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}.zip ./build_${{matrix.build_type}}_${{matrix.arch}}/install/* -r
+          7z a opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}${{env.world_name}}.zip ./build_${{matrix.build_type}}_${{matrix.arch}}_${{matrix.world_flag}}/install/* -r
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -86,7 +87,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.init.outputs.output1 }}
-          asset_path: opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}.zip
-          asset_name: opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}.zip
+          asset_path: opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}${{env.world_name}}.zip
+          asset_name: opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}${{env.world_name}}.zip
           asset_content_type: application/zip
 
