@@ -74,7 +74,7 @@ jobs:
       - name: Build OpenCV
         run: |
           . ".\build_opencv.ps1"
-          BuildForWindows ${{matrix.arch}} ${{matrix.build_type}} ${{world_flag}}
+          BuildForWindows ${{matrix.arch}} ${{matrix.build_type}} ${{matrix.world_flag}}
 
       - name: Compress Package
         run: |
