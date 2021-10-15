@@ -76,10 +76,9 @@ jobs:
           platform: ${{matrix.arch}}
 
       - name: Fix OpenCV Bug
-        if: ${{ github.event.inputs.tag }}=="4.5.3" || ${{ github.event.inputs.tag }}=="4.5.2"
         run: |
           . ".\fix_opencv_bug.ps1"
-          FixOpenCVBug
+          FixOpenCVBug ${{ github.event.inputs.tag }}
 
       - name: Build OpenCV
         run: |
