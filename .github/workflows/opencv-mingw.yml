@@ -74,7 +74,7 @@ jobs:
       - name: Set up MinGW
         uses: egor-tensin/setup-mingw@v2
         with:
-          platform: x64
+          platform: ${{matrix.arch}}
       
       
       - name: Build OpenCV
