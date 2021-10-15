@@ -69,14 +69,18 @@ jobs:
         run: |
           git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv.git
           git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv_contrib.git
-      
-      
+
       - name: Set up MinGW
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: ${{matrix.arch}}
-      
-      
+
+      - name: Fix OpenCV Bug
+        if: ${{ github.event.inputs.tag }}=="4.5.3" || ${{ github.event.inputs.tag }}=="4.5.2"
+        run: |
+          . ".\fix_opencv_bug.ps1"
+          FixOpenCVBug
+
       - name: Build OpenCV
         run: |
           . ".\build_opencv_mingw.ps1"
@@ -85,7 +89,6 @@ jobs:
       - name: Compress Package
         run: |
           7z a opencv-${{ github.event.inputs.tag }}.zip ./build/install/* -r
-
 
       - name: Upload Release Asset
         id: upload-release-asset
