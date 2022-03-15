@@ -57,7 +57,7 @@ jobs:
         arch: ["x86", "x64"]
         generate_flag: ["world", "fully"]
 
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     steps:
       - name: Checkout
