@@ -70,6 +70,7 @@ jobs:
         run: |
           git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv.git
           git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv_contrib.git
+          chmod +x build.sh
           ./build.sh ${{matrix.build_type}}
 
       - name: Compress Package on Ubuntu
