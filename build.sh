@@ -1,5 +1,5 @@
 mkdir build && cd build
-cmake -D CMAKE_BUILD_TYPE=$2 \
+cmake -D CMAKE_BUILD_TYPE=$1 \
     -D CMAKE_INSTALL_PREFIX=./install \
     -D INSTALL_C_EXAMPLES=ON \
     -D INSTALL_PYTHON_EXAMPLES=OFF \
