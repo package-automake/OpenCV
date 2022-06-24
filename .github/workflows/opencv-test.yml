@@ -1,4 +1,4 @@
-name: Full OpenCV Compile (Visual Studio 2019 And GCC)
+name: OpenCV Compile Test
 
 on:
   workflow_dispatch:
