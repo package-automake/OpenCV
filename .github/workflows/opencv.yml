@@ -1,0 +1,138 @@
+name: Full OpenCV Compile (Visual Studio 2019 And GCC)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "choice a opencv version tag"
+        required: true
+        default: "4.5.4"
+
+env:
+  package_name: "OpenCV"
+  version: ${{ github.event.inputs.tag }}
+
+jobs:
+  init:
+    runs-on: windows-2019
+    outputs:
+      output1: "${{ steps.create_release.outputs.upload_url }}"
+    steps:
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true # default: false
+          tag_name: ${{ github.event.inputs.tag }} # tag name to delete
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Create tag
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/${{ github.event.inputs.tag }}",
+              sha: context.sha
+            })
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          release_name: OpenCV-${{ github.event.inputs.tag }}
+          draft: false
+          prerelease: false
+
+      - name: set name
+        run: |
+          echo "::set-output name=y::${{ steps.create_release.outputs.upload_url }}"
+          echo "${{ steps.create_release.outputs.upload_url }}"
+
+  windows-build:
+    needs: init
+    strategy:
+      matrix:
+        build_type: ["Debug", "Release"]
+        arch: ["x86", "x64"]
+        generate_flag: ["world", "fully"]
+
+    runs-on: windows-2019
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Install Server-Media-Foundation
+        shell: powershell
+        run: |
+          Install-WindowsFeature Server-Media-Foundation
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Download OpenCV
+        run: |
+          git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv.git
+          git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv_contrib.git
+
+      - name: Build OpenCV
+        run: |
+          . ".\build_opencv.ps1"
+          BuildForWindows ${{matrix.arch}} ${{matrix.build_type}} ${{matrix.generate_flag}}
+
+      - name: Compress Package
+        run: |
+          7z a opencv-${{ github.event.inputs.tag }}.zip ./build/install/* -r
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.init.outputs.output1 }}
+          asset_path: opencv-${{ github.event.inputs.tag }}.zip
+          asset_name: opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}-${{runner.os}}-${{matrix.generate_flag}}.zip
+          asset_content_type: application/zip
+
+  linux-build:
+    needs: init
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        build_type: ["Debug", "Release"]
+        arch: ["x64"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Build OpenCV
+        shell: bash
+        run: |
+          git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv.git
+          git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv_contrib.git
+          ./build.sh ${{matrix.build_type}}
+          
+      - name: Compress Package on Ubuntu
+        run: |
+          cd ./build/install
+          zip -r ${{ env.package_name }}-${{ env.version }}.zip ./*
+          mv ${{ env.package_name }}-${{ env.version }}.zip ../../${{ env.package_name }}-${{ env.version }}.zip
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.init.outputs.output1 }}
+          asset_path: ${{ env.package_name }}-${{ env.version }}.zip
+          asset_name: ${{ env.package_name }}-${{ env.version }}-${{matrix.build_type}}-${{matrix.arch}}-${{runner.os}}.zip
+          asset_content_type: application/zip

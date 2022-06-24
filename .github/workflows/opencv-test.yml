@@ -1,4 +1,4 @@
-name: Full OpenCV Compile (Visual Studio 2019)
+name: Full OpenCV Compile (Visual Studio 2019 And GCC)
 
 on:
   workflow_dispatch:
@@ -6,11 +6,15 @@ on:
       tag:
         description: "choice a opencv version tag"
         required: true
-        default: "4.5.3"
+        default: "4.5.4"
+
+env:
+  package_name: "OpenCV"
+  version: ${{ github.event.inputs.tag }}
 
 jobs:
   init:
-    runs-on: windows-latest
+    runs-on: windows-2019
     outputs:
       output1: "${{ steps.create_release.outputs.upload_url }}"
     steps:
@@ -20,7 +24,7 @@ jobs:
           tag_name: ${{ github.event.inputs.tag }} # tag name to delete
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Create tag
         uses: actions/github-script@v3
         with:
@@ -49,44 +53,30 @@ jobs:
           echo "::set-output name=y::${{ steps.create_release.outputs.upload_url }}"
           echo "${{ steps.create_release.outputs.upload_url }}"
 
-  build:
+  linux-build:
     needs: init
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         build_type: ["Debug", "Release"]
-        arch: ["x86", "x64"]
-        generate_flag: ["world", "fully"]
-
-    runs-on: windows-2019
-
+        arch: ["x64"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-
-      - name: Install Server-Media-Foundation
-        shell: powershell
-        run: |
-          Install-WindowsFeature Server-Media-Foundation
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
-
-      - name: Download OpenCV
+      - name: Build OpenCV
+        shell: bash
         run: |
           git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv.git
           git clone -b ${{ github.event.inputs.tag }} --depth=1 https://github.com/opencv/opencv_contrib.git
+          ./build.sh ${{matrix.build_type}}
 
-      - name: Build OpenCV
+      - name: Compress Package on Ubuntu
         run: |
-          . ".\build_opencv.ps1"
-          BuildForWindows ${{matrix.arch}} ${{matrix.build_type}} ${{matrix.generate_flag}}
-
-      - name: Compress Package
-        run: |
-          7z a opencv-${{ github.event.inputs.tag }}.zip ./build/install/* -r
-
+          cd ./build/install
+          zip -r ${{ env.package_name }}-${{ env.version }}.zip ./*
+          mv ${{ env.package_name }}-${{ env.version }}.zip ../../${{ env.package_name }}-${{ env.version }}.zip
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -94,6 +84,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.init.outputs.output1 }}
-          asset_path: opencv-${{ github.event.inputs.tag }}.zip
-          asset_name: opencv-${{ github.event.inputs.tag }}-${{matrix.build_type}}-${{matrix.arch}}-${{matrix.generate_flag}}.zip
+          asset_path: ${{ env.package_name }}-${{ env.version }}.zip
+          asset_name: ${{ env.package_name }}-${{ env.version }}-${{matrix.build_type}}-${{matrix.arch}}-${{runner.os}}.zip
           asset_content_type: application/zip
