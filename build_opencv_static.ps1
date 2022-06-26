@@ -1,4 +1,4 @@
-function BuildForWindows($platform, $build_type, $generate_flag) {
+function BuildForWindows($platform, $build_type) {
     $build_dir = "build"
     mkdir $build_dir -Force -ErrorAction Stop | Out-Null
     cd $build_dir
@@ -11,12 +11,6 @@ function BuildForWindows($platform, $build_type, $generate_flag) {
     else {
         $msbuild_platform = "Win32"
         $msmf_flag = "OFF"
-    }
-    if ($generate_flag -eq "world") {
-        $world_flag = "ON"
-    }
-    else {
-        $world_flag = "OFF"
     }
 
 
@@ -45,9 +39,9 @@ function BuildForWindows($platform, $build_type, $generate_flag) {
         -D BUILD_opencv_python_bindings_generator=OFF `
         -D BUILD_opencv_python_tests=OFF `
         -D BUILD_opencv_ts=OFF `
+        -D BUILD_opencv_world=OFF `
         -D BUILD_opencv_video=ON `
         -D BUILD_opencv_videoio=ON `
-        -D BUILD_opencv_world=$world_flag `
         -D WITH_MSMF=${msmf_flag} `
         -D WITH_MSMF_DXVA=${msmf_flag} `
         -D WITH_QT=OFF `
@@ -56,7 +50,7 @@ function BuildForWindows($platform, $build_type, $generate_flag) {
         -D OPENCV_ENABLE_NONFREE=ON `
         -D WITH_GSTREAMER=ON `
         -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules `
-        -D BUILD_SHARED_LIBS=ON ../opencv
+        -D BUILD_SHARED_LIBS=OFF ../opencv
 
     msbuild INSTALL.vcxproj /t:build /p:configuration=$build_type /p:platform=$msbuild_platform -maxcpucount
     ls
