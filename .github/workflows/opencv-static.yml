@@ -118,7 +118,7 @@ jobs:
         run: |
           git clone -b ${{ env.version }} --depth=1 https://github.com/opencv/opencv.git
           git clone -b ${{ env.version }} --depth=1 https://github.com/opencv/opencv_contrib.git
-          chmod +x build.sh
+          chmod +x build_static.sh
           ./build_static.sh ${{matrix.build_type}}
           
       - name: Compress Package on Ubuntu
