@@ -25,6 +25,7 @@ cmake -D CMAKE_BUILD_TYPE=$1 \
     -D BUILD_opencv_video=ON \
     -D BUILD_opencv_videoio=ON \
     -D WITH_QT=OFF \
+    -D WITH_GTK=ON \
     -D WITH_FREETYPE=OFF \
     -D ENABLE_CXX11=1 \
     -D OPENCV_ENABLE_NONFREE=ON \
