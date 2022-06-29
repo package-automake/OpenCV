@@ -1,5 +1,5 @@
 mkdir build && cd build
-apt-get install -y libgtk2.0-dev pkg-config
+sudo apt-get install -y libgtk2.0-dev pkg-config
 
 cmake -D CMAKE_BUILD_TYPE=$1 \
     -D CMAKE_INSTALL_PREFIX=./install \
