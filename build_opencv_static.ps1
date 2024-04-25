@@ -28,6 +28,7 @@ function BuildForWindows($platform, $build_type) {
         -D BUILD_TESTS=OFF `
         -D BUILD_PERF_TESTS=OFF `
         -D BUILD_JAVA=OFF `
+        -D BUILD_WITH_STATIC_CRT=OFF `
         -D BUILD_opencv_apps=OFF `
         -D BUILD_opencv_datasets=OFF `
         -D BUILD_opencv_freetype=OFF `
@@ -45,6 +46,7 @@ function BuildForWindows($platform, $build_type) {
         -D WITH_MSMF=${msmf_flag} `
         -D WITH_MSMF_DXVA=${msmf_flag} `
         -D WITH_QT=OFF `
+        -D WITH_ADE=OFF `
         -D WITH_FREETYPE=OFF `
         -D ENABLE_CXX11=1 `
         -D OPENCV_ENABLE_NONFREE=ON `
