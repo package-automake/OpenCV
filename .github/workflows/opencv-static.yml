@@ -18,7 +18,7 @@ jobs:
     outputs:
       output1: "${{ steps.create_release.outputs.upload_url }}"
     steps:
-      - uses: dev-drprasad/delete-tag-and-release
+      - uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           delete_release: true # default: false
           tag_name: ${{ github.event.inputs.tag }}-static # tag name to delete
