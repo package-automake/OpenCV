@@ -11,6 +11,7 @@ cmake -D CMAKE_BUILD_TYPE=$1 \
     -D BUILD_TESTS=OFF \
     -D BUILD_PERF_TESTS=OFF \
     -D BUILD_JAVA=OFF \
+    -D BUILD_WITH_STATIC_CRT=OFF \
     -D BUILD_opencv_apps=OFF \
     -D BUILD_opencv_datasets=OFF \
     -D BUILD_opencv_freetype=OFF \
